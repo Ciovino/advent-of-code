@@ -3,10 +3,11 @@
 # Problem: See ./02-gift-shop-description.md for full details
 # Author: Ciovino
 # ---------------------------------------------------------------------
-import os
 
-# Parse the input
-with open(os.path.join('data', '2025-02.in'), 'r') as f:
+# Read the input file
+INPUT_FILE = "data/2025-02.in"
+
+with open(INPUT_FILE, "r") as f:
     line = f.readline().strip()
     
     id_ranges: list[str] = line.split(',')
@@ -62,7 +63,6 @@ for id_range in id_ranges:
         elif repeated_sequence(id):
             # Check with the more general function
             invalid_ids['part-two'].append(id)
-
-# --- PRINT ---
-print(f"AOC_SOL_1={sum(invalid_ids['part-one'])}")
-print(f"AOC_SOL_2={sum(invalid_ids['part-two'])}")
+        
+print(f"(Part One) Sum of all invalid ids: {sum(invalid_ids['part-one'])}")
+print(f"(Part Two) Sum of all invalid ids: {sum(invalid_ids['part-two'])}")
