@@ -1,13 +1,12 @@
 # ---------------------------------------------------------------------
-# Advent of Code 2015 - Day 01 - Not Quite a List
-# Problem: See ./01-not-quite-list-description.md for full details
+# Advent of Code 2015 - Day 01 - Not Quite Lisp
+# Problem: See .\2015\01-not-quite-lisp-description.md for full details
 # Author: Ciovino
 # ---------------------------------------------------------------------
+import os
 
-# Read the input file
-INPUT_FILE = "data/2015-01.in"
-
-with open(INPUT_FILE, 'r') as f:
+# Parse the input
+with open(os.path.join('data', '2015-01.in'), 'r') as f:
     floor_plan: list[str] = list(f.readline().strip())
 
 def map_step(step: str) -> int:
@@ -32,5 +31,6 @@ for i, step in enumerate(steps):
         entering_basement = i + 1
         break
 
-print(f"(Part One) Final floor: {sum(steps)}")
-print(f"(Part Two) Entering the basement: {entering_basement}")
+# --- PRINT ---
+print(f"AOC_SOL_1={sum(steps)}")
+print(f"AOC_SOL_2={entering_basement}")
