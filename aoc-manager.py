@@ -205,26 +205,26 @@ def setup_files(year, day):
     if not os.path.exists(py_path):
         input_name = f"{year}-{day:02d}.in"
         template = \
-        f"""# ---------------------------------------------------------------------
-            # Advent of Code {year} - Day {day:02} - {data['title_clean'].title()}
-            # Problem: See .\\{desc_path} for full details
-            # Author: Ciovino
-            # ---------------------------------------------------------------------
-            import os
+f"""# ---------------------------------------------------------------------
+# Advent of Code {year} - Day {day:02} - {data['title_clean'].title()}
+# Problem: See .\\{desc_path} for full details
+# Author: Ciovino
+# ---------------------------------------------------------------------
+import os
 
-            # Parse the input
-            with open(os.path.join('{DATA_FOLDER}', '{input_name}'), 'r') as f:
-                # TODO: Implement the logic based on the input
-                pass
+# Parse the input
+with open(os.path.join('{DATA_FOLDER}', '{input_name}'), 'r') as f:
+    # TODO: Implement the logic based on the input
+    pass
 
-            # --- SOLVE ---
-            part1_solution = 0
-            part2_solution = 0
+# --- SOLVE ---
+part1_solution = 0
+part2_solution = 0
 
-            # --- PRINT ---
-            print(f"AOC_SOL_1={{part1_solution}}")
-            print(f"AOC_SOL_2={{part2_solution}}")
-        """
+# --- PRINT ---
+print(f"AOC_SOL_1={{part1_solution}}")
+print(f"AOC_SOL_2={{part2_solution}}")
+"""
         with open(py_path, "w") as f:
             f.write(template)
         logging.info(f"Created python template at: '{py_path}'")
