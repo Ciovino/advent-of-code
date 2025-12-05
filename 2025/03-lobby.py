@@ -1,14 +1,13 @@
 # ---------------------------------------------------------------------
 # Advent of Code 2025 - Day 03 - Lobby
-# Problem: See ./03-lobby-description.md for full details
+# Problem: See .\2025\03-lobby-description.md for full details
 # Author: Ciovino
 # ---------------------------------------------------------------------
+import os
 
-# Read the input file
-INPUT_FILE = "data/2025-03.in"
-
+# Parse the input
 battery_banks: list[list] = []
-with open(INPUT_FILE, "r") as f:
+with open(os.path.join('data', '2025-03.in'), 'r') as f:
     for line in f.readlines():
         battery_banks.append(list(line.strip()))
 
@@ -45,5 +44,6 @@ def max_joltage(bank: list[str], N: int) -> int:
     # Convert result and return
     return int(max_joltage)
 
-print(f"(Part One) Max joltage with 2 batteries per bank:  {sum(list(map(lambda bank: max_joltage(bank, 2), battery_banks)))}")
-print(f"(Part Two) Max joltage with 12 batteries per bank: {sum(list(map(lambda bank: max_joltage(bank, 12), battery_banks)))}")
+# --- PRINT ---
+print(f"AOC_SOL_1={sum(list(map(lambda bank: max_joltage(bank, 2), battery_banks)))}")
+print(f"AOC_SOL_2={sum(list(map(lambda bank: max_joltage(bank, 12), battery_banks)))}")
