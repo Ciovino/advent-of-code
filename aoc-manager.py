@@ -130,7 +130,7 @@ def get_page_data(year, day):
     main_h2 = soup.find('h2').text
     match = re.search(r"--- Day \d+: (.+) ---", main_h2)
     title_clean = match.group(1) if match else "Unknown Problem"
-    title_slug = title_clean.lower().replace(" ", "-")
+    title_slug = title_clean.lower().replace(" ", "-").replace("?", "")
     
     # 2. Parsing for Description file
     articles = soup.find_all('article', class_="day-desc")
