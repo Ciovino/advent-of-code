@@ -1,15 +1,14 @@
 # ---------------------------------------------------------------------
 # Advent of Code 2025 - Day 04 - Printing Department
-# Problem: See ./04-printing-department-description.md for full details
+# Problem: See .\2025\04-printing-department-description.md for full details
 # Author: Ciovino
 # ---------------------------------------------------------------------
+import os
 
-# Read the input file
-INPUT_FILE = "data/2025-04.in"
-
+# Parse the input
 # Collect paper rolls into a matrix
 paper_rolls: list[list[str]] = []
-with open(INPUT_FILE, 'r') as f:
+with open(os.path.join('data', '2025-04.in'), 'r') as f:
     for line in f:
         paper_rolls.append(list(line.strip()))
 
@@ -68,5 +67,5 @@ while True:
     for r, c in to_be_removed:
         paper_rolls[r][c] = '.'
 
-print(f"(Part One) Paper rolls that can be accessed by a forklift:  {paper_rolls_removed[0]}") # Just the first round
-print(f"(Part Two) Total number of paper rolls that can be removed: {sum(paper_rolls_removed)}")
+print(f"AOC_SOL_1={paper_rolls_removed[0]}")
+print(f"AOC_SOL_2={sum(paper_rolls_removed)}")
