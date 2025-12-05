@@ -66,7 +66,7 @@ The enjoyment of *Advent of Code* relies on everyone's participation; considerat
 ## Repository Structure
 The project is organized by year, with inputs stored centrally.
 ```
-├── aoc-manager.py        # The automation CLI v1.0.1
+├── aoc-manager.py        # The automation CLI v1.0.2
 ├── requirements.txt      # Requirements for the manager
 ├── config.ini            # Configuration (Ignored by Git)
 ├── data/                 # Shared input files
