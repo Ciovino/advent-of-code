@@ -115,6 +115,18 @@ def to_markdown(article_content: list[Tag]):
                 md_output += "\n\n"
     return md_output
 
+def sanitaze_title(title: str) -> str:
+    """ Sanitize the title to be used as filepath """
+    char_to_dash = " '" # All characters that will be replaced with '-'
+    char_to_be_removed = "?" # All characters to be removed
+    
+    title_sanitized = title.lower()
+    for c in char_to_dash: # Replace
+        title_sanitized = title_sanitized.replace(c, '-')
+    for c in char_to_be_removed: # Remove
+        title_sanitized = title_sanitized.replace(c, '')
+    return title_sanitized
+
 def get_page_data(year, day):
     base_url = f"https://adventofcode.com/{year}/day/{day}"
     logging.info(f"Fetching: {base_url}")
@@ -130,7 +142,7 @@ def get_page_data(year, day):
     main_h2 = soup.find('h2').text
     match = re.search(r"--- Day \d+: (.+) ---", main_h2)
     title_clean = match.group(1) if match else "Unknown Problem"
-    title_slug = title_clean.lower().replace(" ", "-")
+    title_sanitized = sanitaze_title(title_clean)
     
     # 2. Parsing for Description file
     articles = soup.find_all('article', class_="day-desc")
@@ -168,7 +180,7 @@ def get_page_data(year, day):
             input_data = resp_input.text
 
     return {
-        "title_slug": title_slug,
+        "title_sanitized": title_sanitized,
         "title_clean": title_clean,
         "status": status,
         "description": full_markdown,
@@ -191,7 +203,7 @@ def setup_files(year, day):
         logging.info(f"Saved input file to '{input_path}'")
 
     # File prefix for description and python script
-    file_prefix = f"{day:02d}-{data['title_slug']}"
+    file_prefix = f"{day:02d}-{data['title_sanitized']}"
     base_path = os.path.join(day_folder, file_prefix)
 
     # --- 2. Description ---
