@@ -117,8 +117,8 @@ def to_markdown(article_content: list[Tag]):
 
 def sanitaze_title(title: str) -> str:
     """ Sanitize the title to be used as filepath """
-    char_to_dash = " '" # All characters that will be replaced with '-'
-    char_to_be_removed = "?" # All characters to be removed
+    char_to_dash = " '." # All characters that will be replaced with '-'
+    char_to_be_removed = "?," # All characters to be removed
     
     title_sanitized = title.lower()
     for c in char_to_dash: # Replace
