@@ -94,7 +94,6 @@ h_edges, v_edges = build_edges(red_tiles)
 rectangles: list[tuple[tuple[int, int], tuple[int, int], int]] = get_all_rectangles(red_tiles)
 found_area: int = 0
 for p1, p2, area in rectangles:
-    # Optional: Logic to stop if area is smaller than best found (not needed if we return first valid)
     if is_valid_rect(p1[0], p2[0], p1[1], p2[1], h_edges, v_edges):
         found_area = area
         break
