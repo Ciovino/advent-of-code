@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------
-# Advent of Code Manager
+# Advent of Code Manager v.1.1.3
 # Author: Ciovino
 # Description: Automates the AoC workflow: fetches inputs, parses HTML 
 #              descriptions to Markdown, generates solution templates, 
@@ -14,6 +14,8 @@ from bs4 import BeautifulSoup, NavigableString, Tag
 import logging
 import argparse
 import subprocess
+from string import Template
+from pathlib import Path
 
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -26,7 +28,8 @@ config.read('config.ini')
 
 SESSION = config['AOC']['session']
 USER_AGENT = config['AOC']['user_agent']
-DATA_FOLDER = config['PATHS']['data_folder']
+DATA_FOLDER = Path(config['PATHS']['data_folder'])
+TEMPLATE_FILE = Path(config['TEMPLATE'].get('template_file', 'base-template.py'))
 
 HEADERS = {
     "User-Agent": USER_AGENT,
@@ -171,9 +174,8 @@ def get_page_data(year, day):
         
     # 4. Input Download
     input_data = ""
-    input_filename = f"{year}-{day:02d}.in"
-    input_path = os.path.join(DATA_FOLDER, input_filename)
-    if not os.path.exists(input_path):
+    input_path = DATA_FOLDER / f"{year}-{day:02d}.in"
+    if not input_path.exists():
         input_url = f"{base_url}/input"
         resp_input = requests.get(input_url, headers=HEADERS)
         if resp_input.status_code == 200:
@@ -197,48 +199,38 @@ def setup_files(year, day):
     
     # --- 1. Save Input File ---
     if data["input_data"]:
-        input_path = os.path.join(DATA_FOLDER, f"{year}-{day:02d}.in")
+        input_path = DATA_FOLDER / f"{year}-{day:02d}.in"
         with open(input_path, "w") as f:
             f.write(data["input_data"])
         logging.info(f"Saved input file to '{input_path}'")
 
     # File prefix for description and python script
-    file_prefix = f"{day:02d}-{data['title_sanitized']}"
-    base_path = os.path.join(day_folder, file_prefix)
+    desc_path = Path(f"{day_folder}/{day:02d}-{data['title_sanitized']}-description.md")
+    py_path = Path(f"{day_folder}/{day:02d}-{data['title_sanitized']}.py")
 
     # --- 2. Description ---
-    desc_path = f"{base_path}-description.md"
     with open(desc_path, "w", encoding="utf-8") as f:
         f.write(data["description"])
     logging.info(f"Description updated, at '{desc_path}'")
 
     # --- 3. Create Python Template ---
-    py_path = f"{base_path}.py"
-    if not os.path.exists(py_path):
+    if not py_path.exists():
         input_name = f"{year}-{day:02d}.in"
-        template = \
-f"""# ---------------------------------------------------------------------
-# Advent of Code {year} - Day {day:02} - {data['title_clean'].title()}
-# Problem: See .\\{desc_path} for full details
-# Author: Ciovino
-# ---------------------------------------------------------------------
-import os
-
-# Parse the input
-with open(os.path.join('{DATA_FOLDER}', '{input_name}'), 'r') as f:
-    # TODO: Implement the logic based on the input
-    pass
-
-# --- SOLVE ---
-part1_solution = 0
-part2_solution = 0
-
-# --- PRINT ---
-print(f"AOC_SOL_1={{part1_solution}}")
-print(f"AOC_SOL_2={{part2_solution}}")
-"""
+        
+        # Load the template from a file
+        with open(TEMPLATE_FILE, 'r') as f:
+            template_src = Template(f.read())
+            
+        filled_content = template_src.safe_substitute({
+            'year': year,
+            'day_padded': f"{day:02}",
+            'title_clean': data['title_clean'].title(),
+            'desc_path': desc_path,
+            'data_folder': DATA_FOLDER,
+            'input_name': input_name,
+        })
         with open(py_path, "w") as f:
-            f.write(template)
+            f.write(filled_content)
         logging.info(f"Created python template at: '{py_path}'")
     else:
         logging.warning(f"Python template already exists, at: '{py_path}'")
