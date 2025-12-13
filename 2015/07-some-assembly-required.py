@@ -2,20 +2,43 @@
 # Advent of Code 2015 - Day 07 - Some Assembly Required
 # Problem: See .\2015\07-some-assembly-required-description.md for full details
 # Author: Ciovino
+# Template Version: v1.0
 # ---------------------------------------------------------------------
 import os
+import argparse
+import time
 
+# Useful imports
+import re
+from collections import defaultdict, Counter, deque
+from itertools import combinations, permutations, product
+from math import gcd, lcm, ceil, floor
+
+INPUT_FILE = os.path.join('data', '2015-07.in')
+TEST_FILE = os.path.join('data', 'test.in')
+VERBOSE = False
 N_BITS = 16
 MASK = (1 << N_BITS) - 1
+PART1_SOLUTION = None
 
-# Parse the input
-circuit: dict[str, str] = dict()
-with open(os.path.join('data', '2015-07.in'), 'r') as f:
-    for line in f:
-        signal = line.strip().split('->') # (operation) -> output
-        operation, wire = signal[0].strip(), signal[-1].strip()
-        
-        circuit[wire] = operation
+def log(*args, **kwargs):
+    if VERBOSE: # Print only if VERBOSE is enabled
+        print(*args, **kwargs)
+
+def get_args() -> dict:
+    parser = argparse.ArgumentParser(description="Solution script for 07/2015 Advent of Code.")
+    parser.add_argument('-t', '--test', action='store_true',  help=f"Run the script using the test file ({TEST_FILE})")
+    parser.add_argument('-v', '--verbose', action='store_true', help="Enable verbose output.")
+    return parser.parse_args()
+
+def parse_input(file_name) -> dict[str, str]:
+    data: dict[str, str] = {}
+    with open(file_name, 'r') as f:
+        for line in f:
+            line = line.strip().split('->') # (operation) -> output
+            operation, wire = line[0].strip(), line[-1].strip()
+            data[wire] = operation
+    return data
 
 # --- SOLVE ---
 def compute(wire: str, circuit: dict[str, str], cache: dict[str, int]) -> int:
@@ -23,15 +46,11 @@ def compute(wire: str, circuit: dict[str, str], cache: dict[str, int]) -> int:
     if wire.isdigit():
         return int(wire)
     
-    # Check Cache
     if wire in cache:
         return cache[wire]
 
     # Get the operation from the circuit
     operation = circuit.get(wire)
-    if not operation:
-        raise ValueError(f"No known operation for wire {wire}")
-
     arguments = operation.split()
     result = 0
 
@@ -55,20 +74,48 @@ def compute(wire: str, circuit: dict[str, str], cache: dict[str, int]) -> int:
             result = (left << right) & MASK
         elif op == "RSHIFT":
             result = (left >> right) & MASK
-            
-    # Save result to cache
+    
     cache[wire] = result
     return result
 
-cache_1: dict[str, int] = {}
-wire_a_part1 = compute('a', circuit, cache_1)
+def solve_part1(circuit: dict[str, str]) -> int:
+    """Solution for Part 1."""
+    global PART1_SOLUTION
+    PART1_SOLUTION = compute('a', circuit, {})
+    return PART1_SOLUTION
 
-# Part 2
-# Override b with the value of a
-circuit['b'] = str(wire_a_part1)
-cache_2: dict[str, int] = {}
-wire_a_part2 = compute('a', circuit, cache_2)
+def solve_part2(circuit: dict[str, str]) -> int:
+    """Solution for Part 2."""
+    global PART1_SOLUTION
+    circuit['b'] = str(PART1_SOLUTION)
+    return compute('a', circuit, {})
 
-# --- PRINT ---
-print(f"AOC_SOL_1={wire_a_part1}")
-print(f"AOC_SOL_2={wire_a_part2}")
+if __name__ == '__main__':
+    args = get_args()
+    if args.test:
+        if not os.path.exists(TEST_FILE):
+            print(f"ERROR: Test file '{TEST_FILE}' not found.")
+            exit(1)
+        use_file = TEST_FILE
+    else:
+        use_file = INPUT_FILE
+    VERBOSE = args.verbose
+    
+    # Parsing
+    start_time = time.time()
+    data = parse_input(use_file)
+    log(f"Input parsed in {time.time()-start_time:.4f}s")
+    
+    # Part 1
+    start_time = time.time()
+    sol1 = solve_part1(data)
+    log(f"Part 1: {sol1}, took {time.time()-start_time:.4f}s")
+    
+    # Part 2
+    start_time = time.time()
+    sol2 = solve_part2(data)
+    log(f"Part 2: {sol2}, took {time.time()-start_time:.4f}s")
+
+    # --- PRINT SOLUTIONS ---
+    print(f"AOC_SOL_1={sol1}")
+    print(f"AOC_SOL_2={sol2}")

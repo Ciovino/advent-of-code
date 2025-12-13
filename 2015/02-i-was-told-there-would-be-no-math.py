@@ -2,29 +2,45 @@
 # Advent of Code 2015 - Day 02 - I Was Told There Would Be No Math
 # Problem: See .\2015\02-i-was-told-there-would-be-no-math-description.md for full details
 # Author: Ciovino
+# Template Version: v1.0
 # ---------------------------------------------------------------------
 import os
+import argparse
+import time
 
-# Parse the input
-presents: list[int] = [] # present format: length x width x height
-with open(os.path.join('data', '2015-02.in'), 'r') as f:
-    for line in f:
-        presents.append(tuple(map(int, line.strip().split('x'))))
+# Useful imports
+import re
+from collections import defaultdict, Counter, deque
+from itertools import combinations, permutations, product
+from math import gcd, lcm, ceil, floor
+
+INPUT_FILE = os.path.join('data', '2015-02.in')
+TEST_FILE = os.path.join('data', 'test.in')
+VERBOSE = False
+
+def log(*args, **kwargs):
+    if VERBOSE: # Print only if VERBOSE is enabled
+        print(*args, **kwargs)
+
+def get_args() -> dict:
+    parser = argparse.ArgumentParser(description="Solution script for 02/2015 Advent of Code.")
+    parser.add_argument('-t', '--test', action='store_true',  help=f"Run the script using the test file ({TEST_FILE})")
+    parser.add_argument('-v', '--verbose', action='store_true', help="Enable verbose output.")
+    return parser.parse_args()
+
+def parse_input(file_name) -> list[tuple[int, int, int]]:
+    with open(file_name, 'r') as f:
+        data: list[tuple[int, int, int]] = [tuple(map(int, line.strip().split('x'))) for line in f]
+    return data
 
 # --- SOLVE ---
 def amount_paper(length: int, width: int, height: int) -> int:
-    # A box as 6 total faces. Opposite sides are equals
     area_faces: tuple[int, int, int] = (
-        length * width, 
-        width * height, 
+        length * width,
+        width * height,
         height * length
     )
-    
-    # Total area is double the sum of the area of the faces
     total_area: int = 2 * sum(area_faces)
-
-    # Total amount of wrapping paper is then the area plus and extra
-    #   equal to the minimum area between the faces
     return total_area + min(area_faces)
 
 def amount_ribbon(length: int, width: int, height: int) -> int:
@@ -33,19 +49,45 @@ def amount_ribbon(length: int, width: int, height: int) -> int:
         2*(width + height),
         2*(height + length)
     )
-    
-    # Base for the ribbon is the minimun perimeter
-    ribbon_base: int = min(perimeter_faces)
-    
-    # For the bow we compute the cubic volume
+    ribbon_base: int = min(perimeter_faces)    
     bow: int = length * width * height
-    
     return ribbon_base + bow
 
-# Map each present to the amount of wrapping paper needed
-wrapping_paper_per_present: list[int] = list(map(lambda present: amount_paper(*present), presents))
-ribbon_per_present: list[int] = list(map(lambda present: amount_ribbon(*present), presents))
+# --- SOLVE ---
+def solve_part1(presents: list[tuple[int, int, int]]) -> int:
+    """Solution for Part 1."""
+    return sum(list(map(lambda p: amount_paper(*p), presents)))
 
-# --- PRINT ---
-print(f"AOC_SOL_1={sum(wrapping_paper_per_present)}")
-print(f"AOC_SOL_2={sum(ribbon_per_present)}")
+def solve_part2(presents: list[tuple[int, int, int]]) -> int:
+    """Solution for Part 2."""
+    return sum(list(map(lambda p: amount_ribbon(*p), presents)))
+
+if __name__ == '__main__':
+    args = get_args()
+    if args.test:
+        if not os.path.exists(TEST_FILE):
+            print(f"ERROR: Test file '{TEST_FILE}' not found.")
+            exit(1)
+        use_file = TEST_FILE
+    else:
+        use_file = INPUT_FILE
+    VERBOSE = args.verbose
+    
+    # Parsing
+    start_time = time.time()
+    data = parse_input(use_file)
+    log(f"Input parsed in {time.time()-start_time:.4f}s")
+    
+    # Part 1
+    start_time = time.time()
+    sol1 = solve_part1(data)
+    log(f"Part 1: {sol1}, took {time.time()-start_time:.4f}s")
+    
+    # Part 2
+    start_time = time.time()
+    sol2 = solve_part2(data)
+    log(f"Part 2: {sol2}, took {time.time()-start_time:.4f}s")
+
+    # --- PRINT SOLUTIONS ---
+    print(f"AOC_SOL_1={sol1}")
+    print(f"AOC_SOL_2={sol2}")

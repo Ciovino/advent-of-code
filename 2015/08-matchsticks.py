@@ -2,19 +2,77 @@
 # Advent of Code 2015 - Day 08 - Matchsticks
 # Problem: See .\2015\08-matchsticks-description.md for full details
 # Author: Ciovino
+# Template Version: v1.0
 # ---------------------------------------------------------------------
 import os
+import argparse
+import time
+
+# Useful imports
+import re
+from collections import defaultdict, Counter, deque
+from itertools import combinations, permutations, product
+from math import gcd, lcm, ceil, floor
 import json
 
-# Parse the input
-with open(os.path.join('data', '2015-08.in'), 'r') as f:
-    strings_literal: list[str] = list(map(lambda s: s.strip(), f.readlines()))
+INPUT_FILE = os.path.join('data', '2015-08.in')
+TEST_FILE = os.path.join('data', 'test.in')
+VERBOSE = False
+
+def log(*args, **kwargs):
+    if VERBOSE: # Print only if VERBOSE is enabled
+        print(*args, **kwargs)
+
+def get_args() -> dict:
+    parser = argparse.ArgumentParser(description="Solution script for 08/2015 Advent of Code.")
+    parser.add_argument('-t', '--test', action='store_true',  help=f"Run the script using the test file ({TEST_FILE})")
+    parser.add_argument('-v', '--verbose', action='store_true', help="Enable verbose output.")
+    return parser.parse_args()
+
+def parse_input(file_name) -> list[str]:
+    with open(file_name, 'r') as f:
+        data: list[str] = list(map(lambda s: s.strip(), f.readlines()))
+    return data
 
 # --- SOLVE ---
-code_characters = sum(list(map(len, strings_literal)))
-in_memory_characters = sum(list(map(lambda s: len(eval(s)), strings_literal)))
-encoded_characters = sum(list(map(lambda s: len(json.dumps(s)), strings_literal)))
+def solve_part1(strings_literal: list[str]) -> int:
+    """Solution for Part 1."""
+    code: int = sum(list(map(len, strings_literal)))
+    in_memory: int = sum(list(map(lambda s: len(eval(s)), strings_literal)))
+    return code - in_memory
 
-# --- PRINT ---
-print(f"AOC_SOL_1={code_characters - in_memory_characters}")
-print(f"AOC_SOL_2={encoded_characters - code_characters}")
+def solve_part2(strings_literal: list[str]) -> int:
+    """Solution for Part 2."""
+    code: int = sum(list(map(len, strings_literal)))
+    encoded: int = sum(list(map(lambda s: len(json.dumps(s)), strings_literal)))
+    return encoded - code
+
+if __name__ == '__main__':
+    args = get_args()
+    if args.test:
+        if not os.path.exists(TEST_FILE):
+            print(f"ERROR: Test file '{TEST_FILE}' not found.")
+            exit(1)
+        use_file = TEST_FILE
+    else:
+        use_file = INPUT_FILE
+    VERBOSE = args.verbose
+    
+    # Parsing
+    start_time = time.time()
+    data = parse_input(use_file)
+    log(f"Input parsed in {time.time()-start_time:.4f}s")
+    
+    # Part 1
+    start_time = time.time()
+    sol1 = solve_part1(data)
+    log(f"Part 1: {sol1}, took {time.time()-start_time:.4f}s")
+    
+    # Part 2
+    start_time = time.time()
+    sol2 = solve_part2(data)
+    log(f"Part 2: {sol2}, took {time.time()-start_time:.4f}s")
+
+    # --- PRINT SOLUTIONS ---
+    print(f"AOC_SOL_1={sol1}")
+    print(f"AOC_SOL_2={sol2}")
