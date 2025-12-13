@@ -4,15 +4,36 @@
 # Author: Ciovino
 # ---------------------------------------------------------------------
 import os
-from math import sqrt, prod
+import argparse
+import time
 
+# Useful imports
+import re
+from collections import defaultdict, Counter, deque
+from itertools import combinations, permutations, product
+from math import gcd, lcm, ceil, floor, sqrt, prod
+
+INPUT_FILE = os.path.join('data', '2025-08.in')
+TEST_FILE = os.path.join('data', 'test.in')
+VERBOSE = False
 PAIR = 1000
 
-# Parse the input
-jboxes: dict[int, tuple[int, int, int]] = {}
-with open(os.path.join('data', '2025-08.in'), 'r') as f:
-    for i, line in enumerate(f):
-        jboxes[i] = tuple(map(int, line.strip().split(',')))
+def log(*args, **kwargs):
+    if VERBOSE: # Print only if VERBOSE is enabled
+        print(*args, **kwargs)
+
+def get_args() -> dict:
+    parser = argparse.ArgumentParser(description="Solution script for 08/2025 Advent of Code.")
+    parser.add_argument('-t', '--test', action='store_true',  help=f"Run the script using the test file ({TEST_FILE})")
+    parser.add_argument('-v', '--verbose', action='store_true', help="Enable verbose output.")
+    return parser.parse_args()
+
+def parse_input(file_name) -> tuple[dict[int, tuple[int, int, int]], list[int], list[tuple[tuple, tuple, float]]]:
+    data: dict[int, tuple[int, int, int]] = {}
+    with open(file_name, 'r') as f:
+        for i, line in enumerate(f):
+            data[i] = tuple(map(int, line.strip().split(',')))
+    return data, list(range(len(data))), compute_all_distances(data)
 
 # --- SOLVE ---
 def distance(point_a: tuple, point_b: tuple):
@@ -44,25 +65,59 @@ def connect_jboxes(parents: list[int], jbox_A: int, jbox_B: int) -> bool:
         parents[root_B] = root_A
         return True
     return False
-    
-circuits: list[int] = list(range(len(jboxes))) # Each jbox is in its own circuit
-all_pairs: list[tuple[tuple, tuple, float]] = compute_all_distances(jboxes)
 
-part_1_solved = -1
-last_connected_pair: tuple[int, int] = (-1, -1)
-group_sizes: dict[int, int] = {}
-for i, (jbox_A, jbox_B, _) in enumerate(all_pairs):
-    if i == PAIR:
-        for i in range(len(circuits)):
-            # Find the root for jbox_i
-            root = find(i, circuits)
-            dim = group_sizes.get(root, 0)
-            group_sizes[root] = dim + 1
-        part_1_solved = prod(sorted(group_sizes.values(), reverse=True)[:3])
-    
-    if connect_jboxes(circuits, jbox_A, jbox_B):
-        last_connected_pair = (jbox_A, jbox_B)
+def solve_part1(data: tuple[dict[int, tuple[int, int, int]], list[int], list[tuple[tuple, tuple, float]]]) -> int:
+    """Solution for Part 1."""
+    _, circuits, all_pairs = data # Unpack
+    group_sizes: dict[int, int] = {}
 
-# --- PRINT ---
-print(f"AOC_SOL_1={part_1_solved}")
-print(f"AOC_SOL_2={jboxes[last_connected_pair[0]][0] * jboxes[last_connected_pair[1]][0]}")
+    for i, (jbox_A, jbox_B, _) in enumerate(all_pairs):
+        if i == PAIR:
+            for j in range(len(circuits)):
+                root = find(j, circuits)
+                size = group_sizes.get(root, 0)
+                group_sizes[root] = size + 1
+            return prod(sorted(group_sizes.values(), reverse=True)[:3])
+        connect_jboxes(circuits, jbox_A, jbox_B)
+    return 0
+
+def solve_part2(data: tuple[dict[int, tuple[int, int, int]], list[int], list[tuple[tuple, tuple, float]]]) -> int:
+    """Solution for Part 2."""
+    jboxes, circuits, all_pairs = data # Unpack
+    last_connected: tuple[int, int] = (-1, -1)
+    
+    for jbox_A, jbox_B, _ in all_pairs:
+        if connect_jboxes(circuits, jbox_A, jbox_B):
+            last_connected = (jbox_A, jbox_B)
+    
+    return jboxes[last_connected[0]][0] * jboxes[last_connected[1]][0]
+
+if __name__ == '__main__':
+    args = get_args()
+    if args.test:
+        if not os.path.exists(TEST_FILE):
+            print(f"ERROR: Test file '{TEST_FILE}' not found.")
+            exit(1)
+        use_file = TEST_FILE
+    else:
+        use_file = INPUT_FILE
+    VERBOSE = args.verbose
+    
+    # Parsing
+    start_time = time.time()
+    data = parse_input(use_file)
+    log(f"Input parsed in {time.time()-start_time:.4f}s")
+    
+    # Part 1
+    start_time = time.time()
+    sol1 = solve_part1(data)
+    log(f"Part 1: {sol1}, took {time.time()-start_time:.4f}s")
+    
+    # Part 2
+    start_time = time.time()
+    sol2 = solve_part2(data)
+    log(f"Part 2: {sol2}, took {time.time()-start_time:.4f}s")
+
+    # --- PRINT SOLUTIONS ---
+    print(f"AOC_SOL_1={sol1}")
+    print(f"AOC_SOL_2={sol2}")

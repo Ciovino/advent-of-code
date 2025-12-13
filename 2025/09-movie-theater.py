@@ -4,14 +4,37 @@
 # Author: Ciovino
 # ---------------------------------------------------------------------
 import os
+import argparse
+import time
+
+# Useful imports
+import re
+from collections import defaultdict, Counter, deque
+from itertools import combinations, permutations, product
+from math import gcd, lcm, ceil, floor
 from bisect import bisect_left, bisect_right
 
-# Parse the input
-red_tiles: list[tuple[int, int]] = []
-with open(os.path.join('data', '2025-09.in'), 'r') as f:
-    for line in f:
-        new_tile = tuple(map(int, line.strip().split(',')))
-        red_tiles.append(new_tile)
+INPUT_FILE = os.path.join('data', '2025-09.in')
+TEST_FILE = os.path.join('data', 'test.in')
+VERBOSE = False
+
+def log(*args, **kwargs):
+    if VERBOSE: # Print only if VERBOSE is enabled
+        print(*args, **kwargs)
+
+def get_args() -> dict:
+    parser = argparse.ArgumentParser(description="Solution script for 09/2025 Advent of Code.")
+    parser.add_argument('-t', '--test', action='store_true',  help=f"Run the script using the test file ({TEST_FILE})")
+    parser.add_argument('-v', '--verbose', action='store_true', help="Enable verbose output.")
+    return parser.parse_args()
+
+def parse_input(file_name) -> list[tuple[int, int]]:
+    data: list[tuple[int, int]] = []
+    with open(file_name, 'r') as f:
+        for line in f:
+            data.append(tuple(map(int, line.strip().split(','))))
+    return data
+
 
 # --- SOLVE ---
 def area_rectangle(corner_1: tuple[int, int], corner_2: tuple[int, int]) -> int:
@@ -29,6 +52,11 @@ def get_all_rectangles(points: list[tuple[int, int]]) -> list[tuple[tuple[int, i
     
     rectangles.sort(key=lambda x: x[2], reverse=True)
     return rectangles
+
+def solve_part1(red_tiles: list[tuple[int, int]]) -> int:
+    """Solution for Part 1."""
+    rectangles: list[tuple[tuple[int, int], tuple[int, int], int]] = get_all_rectangles(red_tiles)
+    return rectangles[0][2]
 
 def build_edges(points: list[tuple[int, int]]) -> tuple[list[tuple[int, int, int]], list[tuple[int, int, int]]]:
     h_edges = [] # (y, x_min, x_max)
@@ -90,14 +118,42 @@ def is_valid_rect(r_x1: int, r_x2: int, r_y1: int, r_y2: int, h_edges: list[tupl
 
     return (intersections % 2) == 1 # Odd intersections => Inside
 
-h_edges, v_edges = build_edges(red_tiles)
-rectangles: list[tuple[tuple[int, int], tuple[int, int], int]] = get_all_rectangles(red_tiles)
-found_area: int = 0
-for p1, p2, area in rectangles:
-    if is_valid_rect(p1[0], p2[0], p1[1], p2[1], h_edges, v_edges):
-        found_area = area
-        break
+def solve_part2(red_tiles: list[tuple[int, int]]) -> int:
+    """Solution for Part 2."""
+    h_edges, v_edges = build_edges(red_tiles)
+    rectangles: list[tuple[tuple[int, int], tuple[int, int], int]] = get_all_rectangles(red_tiles)
+    for p1, p2, area in rectangles:
+        if is_valid_rect(p1[0], p2[0], p1[1], p2[1], h_edges, v_edges):
+            return area
+    
+    return 0
 
-# --- PRINT ---
-print(f"AOC_SOL_1={rectangles[0][2]}")
-print(f"AOC_SOL_2={found_area}")
+if __name__ == '__main__':
+    args = get_args()
+    if args.test:
+        if not os.path.exists(TEST_FILE):
+            print(f"ERROR: Test file '{TEST_FILE}' not found.")
+            exit(1)
+        use_file = TEST_FILE
+    else:
+        use_file = INPUT_FILE
+    VERBOSE = args.verbose
+    
+    # Parsing
+    start_time = time.time()
+    data = parse_input(use_file)
+    log(f"Input parsed in {time.time()-start_time:.4f}s")
+    
+    # Part 1
+    start_time = time.time()
+    sol1 = solve_part1(data)
+    log(f"Part 1: {sol1}, took {time.time()-start_time:.4f}s")
+    
+    # Part 2
+    start_time = time.time()
+    sol2 = solve_part2(data)
+    log(f"Part 2: {sol2}, took {time.time()-start_time:.4f}s")
+
+    # --- PRINT SOLUTIONS ---
+    print(f"AOC_SOL_1={sol1}")
+    print(f"AOC_SOL_2={sol2}")

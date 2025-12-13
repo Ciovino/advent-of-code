@@ -1,6 +1,6 @@
 # ---------------------------------------------------------------------
-# Advent of Code 2025 - Day 01 - Secret Entrance
-# Problem: See ./01-secret-entrance-description.md for full details
+# Advent of Code $year - Day $day_padded - $title_clean
+# Problem: See ./$desc_path for full details
 # Author: Ciovino
 # ---------------------------------------------------------------------
 import os
@@ -13,55 +13,33 @@ from collections import defaultdict, Counter, deque
 from itertools import combinations, permutations, product
 from math import gcd, lcm, ceil, floor
 
-INPUT_FILE = os.path.join('data', '2025-01.in')
-TEST_FILE = os.path.join('data', 'test.in')
+INPUT_FILE = os.path.join('$data_folder', '$input_name')
+TEST_FILE = os.path.join('$data_folder', 'test.in')
 VERBOSE = False
-DIAL_START = 50
-DIAL_DIM = 100
 
 def log(*args, **kwargs):
     if VERBOSE: # Print only if VERBOSE is enabled
         print(*args, **kwargs)
 
 def get_args() -> dict:
-    parser = argparse.ArgumentParser(description="Solution script for 01/2025 Advent of Code.")
+    parser = argparse.ArgumentParser(description="Solution script for $day_padded/$year Advent of Code.")
     parser.add_argument('-t', '--test', action='store_true',  help=f"Run the script using the test file ({TEST_FILE})")
     parser.add_argument('-v', '--verbose', action='store_true', help="Enable verbose output.")
     return parser.parse_args()
 
-def parse_input(file_name) -> list[tuple[str, int]]:
-    moves: list[tuple[str, int]] = []
+def parse_input(file_name):
     with open(file_name, 'r') as f:
-        for line in f:
-            direction, distance = line[0], int(line[1:])
-            moves.append((direction, distance))
-    return moves
+        data = f.read().splitlines()
+    return data
 
 # --- SOLVE ---
-def solve_part1(moves: list[tuple[str, int]]) -> int:
+def solve_part1(data):
     """Solution for Part 1."""
-    dial, land_on_zero = DIAL_START, 0
-    
-    for direction, distance in moves:
-        step = 1 if direction == 'R' else -1
-        dial = (dial + step * distance) % DIAL_DIM
-        land_on_zero += dial == 0
-    
-    return land_on_zero
+    return None
 
-def solve_part2(moves: list[tuple[str, int]]) -> int:
+def solve_part2(data):
     """Solution for Part 2."""
-    dial, zero_clicks = DIAL_START, 0
-    
-    for direction, distance in moves:
-        step = 1 if direction == 'R' else -1        
-        
-        for _ in range(distance):
-            dial = (dial + step) % DIAL_DIM
-            if dial == 0:
-                zero_clicks += 1
-    
-    return zero_clicks
+    return None
 
 if __name__ == '__main__':
     args = get_args()

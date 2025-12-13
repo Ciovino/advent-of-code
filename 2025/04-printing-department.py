@@ -4,68 +4,115 @@
 # Author: Ciovino
 # ---------------------------------------------------------------------
 import os
+import argparse
+import time
 
-# Parse the input
-# Collect paper rolls into a matrix
-paper_rolls: list[list[str]] = []
-with open(os.path.join('data', '2025-04.in'), 'r') as f:
-    for line in f:
-        paper_rolls.append(list(line.strip()))
+# Useful imports
+import re
+from collections import defaultdict, Counter, deque
+from itertools import combinations, permutations, product
+from math import gcd, lcm, ceil, floor
 
-# Compute number of rows and columns
-ROWS, COLUMNS = len(paper_rolls), len(paper_rolls[0])
+INPUT_FILE = os.path.join('data', '2025-04.in')
+TEST_FILE = os.path.join('data', 'test.in')
+VERBOSE = False
 
-def can_be_accessed(paper_rolls: list[list[str]], r: int, c: int):
+def log(*args, **kwargs):
+    if VERBOSE: # Print only if VERBOSE is enabled
+        print(*args, **kwargs)
+
+def get_args() -> dict:
+    parser = argparse.ArgumentParser(description="Solution script for 04/2025 Advent of Code.")
+    parser.add_argument('-t', '--test', action='store_true',  help=f"Run the script using the test file ({TEST_FILE})")
+    parser.add_argument('-v', '--verbose', action='store_true', help="Enable verbose output.")
+    return parser.parse_args()
+
+def parse_input(file_name) -> list[list[str]]:
+    data: list[list[str]] = []
+    with open(file_name, 'r') as f:
+        for line in f:
+            data.append(list(line.strip()))
+    return data
+
+# --- SOLVE ---
+def can_be_accessed(paper_rolls: list[list[str]], r: int, c: int) -> bool:
     neighbors_paper_rolls = 0
-    for i in [-1, 0, 1]:
-        # [Previous, Same, Next] Row
+    for i in [-1, 0, 1]: # [Previous, Same, Next] Row
         row_index = r + i
-        # Skip if outside the map
         if row_index < 0 or row_index >= len(paper_rolls):
             continue
         
-        for j in [-1, 0, 1]:
-            # [Previous, Same, Next] Column
+        for j in [-1, 0, 1]: # [Previous, Same, Next] Column
             col_index = c + j
-            # Skip if outside the map
             if col_index < 0 or col_index >= len(paper_rolls[0]):
                 continue
-            # Skip itself
             if row_index == r and col_index == c:
                 continue
             
             if paper_rolls[row_index][col_index] == '@':
                 neighbors_paper_rolls += 1
     
-    # It can be removed if it has less than 4 roll neighbors
-    return neighbors_paper_rolls < 4
+    return neighbors_paper_rolls < 4 # Remove if it has less than 4 roll neighbors
 
-paper_rolls_removed: list[int] = [] # How many rolls removed each turn
-while True:
-    # List of coords for rolls to be removed at the end of the round
-    to_be_removed: list[tuple[int, int]] = []
+def solve_part1(paper_rolls: list[list[str]]) -> int:
+    """Solution for Part 1."""
+    ROWS, COLUMNS = len(paper_rolls), len(paper_rolls[0])
     
-    # Loop the matrix
+    removed: int = 0
     for r in range(ROWS):
         for c in range(COLUMNS):
-            # Check only if it's a paper roll
             if paper_rolls[r][c] == '@':
-                # Check if the paper roll can be removed
-                #   e.g: at most 3 out of 8 neighbors are paper rolls
-                if can_be_accessed(paper_rolls, r, c):
+                removed += can_be_accessed(paper_rolls, r, c)
+
+    return removed
+
+def solve_part2(paper_rolls: list[list[str]]) -> int:
+    """Solution for Part 2."""
+    ROWS, COLUMNS = len(paper_rolls), len(paper_rolls[0])
+    
+    removed: int = 0
+    while True:
+        to_be_removed: list[tuple[int]] = [] # Coords of rolls to remove at the end
+        for r in range(ROWS):
+            for c in range(COLUMNS):
+                if paper_rolls[r][c] == '@' and can_be_accessed(paper_rolls, r, c):
+                    removed += 1
                     to_be_removed.append((r, c))
+        
+        if len(to_be_removed) == 0:
+            break
+        
+        for r, c in to_be_removed:
+            paper_rolls[r][c] = '.'
 
-    removed_paper_rolls = len(to_be_removed)
-    if removed_paper_rolls == 0:
-        # Ending condition
-        break
-    
-    # Save round value
-    paper_rolls_removed.append(removed_paper_rolls)
-    
-    # Remove paper rolls
-    for r, c in to_be_removed:
-        paper_rolls[r][c] = '.'
+    return removed
 
-print(f"AOC_SOL_1={paper_rolls_removed[0]}")
-print(f"AOC_SOL_2={sum(paper_rolls_removed)}")
+if __name__ == '__main__':
+    args = get_args()
+    if args.test:
+        if not os.path.exists(TEST_FILE):
+            print(f"ERROR: Test file '{TEST_FILE}' not found.")
+            exit(1)
+        use_file = TEST_FILE
+    else:
+        use_file = INPUT_FILE
+    VERBOSE = args.verbose
+    
+    # Parsing
+    start_time = time.time()
+    data = parse_input(use_file)
+    log(f"Input parsed in {time.time()-start_time:.4f}s")
+    
+    # Part 1
+    start_time = time.time()
+    sol1 = solve_part1(data)
+    log(f"Part 1: {sol1}, took {time.time()-start_time:.4f}s")
+    
+    # Part 2
+    start_time = time.time()
+    sol2 = solve_part2(data)
+    log(f"Part 2: {sol2}, took {time.time()-start_time:.4f}s")
+
+    # --- PRINT SOLUTIONS ---
+    print(f"AOC_SOL_1={sol1}")
+    print(f"AOC_SOL_2={sol2}")

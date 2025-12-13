@@ -24,6 +24,10 @@ user_agent = [github.com/Ciovino/advent-of-code](https://github.com/Ciovino/adve
 
 [PATHS]
 data_folder = data
+
+[TEMPLATE]
+# Your template file. You can create a new template with everything you need, and then add here the path to it.
+template_file = base-template.py
 ```
 
 ## Installation & Requirements
@@ -66,7 +70,7 @@ The enjoyment of *Advent of Code* relies on everyone's participation; considerat
 ## Repository Structure
 The project is organized by year, with inputs stored centrally.
 ```
-├── aoc-manager.py        # The automation CLI v1.0.3
+├── aoc-manager.py        # The automation CLI v1.1.3
 ├── requirements.txt      # Requirements for the manager
 ├── config.ini            # Configuration (Ignored by Git)
 ├── data/                 # Shared input files
