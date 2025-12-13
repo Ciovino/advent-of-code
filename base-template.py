@@ -2,7 +2,7 @@
 # Advent of Code $year - Day $day_padded - $title_clean
 # Problem: See ./$desc_path for full details
 # Author: Ciovino
-# Template Version: v1.0
+# Template Version: v2.0
 # ---------------------------------------------------------------------
 import os
 import argparse
@@ -27,6 +27,9 @@ def get_args() -> dict:
     parser.add_argument('-t', '--test', action='store_true',  help=f"Run the script using the test file ({TEST_FILE})")
     parser.add_argument('-v', '--verbose', action='store_true', help="Enable verbose output.")
     return parser.parse_args()
+
+def find_numbers(text):
+    return [int(n) for n in re.findall(r'-?\d+', text)]
 
 def parse_input(file_name):
     with open(file_name, 'r') as f:
