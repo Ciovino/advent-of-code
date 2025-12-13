@@ -2,6 +2,7 @@
 # Advent of Code 2025 - Day 01 - Secret Entrance
 # Problem: See ./01-secret-entrance-description.md for full details
 # Author: Ciovino
+# Template Version: v1.0
 # ---------------------------------------------------------------------
 import os
 import argparse

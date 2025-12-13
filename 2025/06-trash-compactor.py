@@ -2,6 +2,7 @@
 # Advent of Code 2025 - Day 06 - Trash Compactor
 # Problem: See .\2025\06-trash-compactor-description.md for full details
 # Author: Ciovino
+# Template Version: v1.0
 # ---------------------------------------------------------------------
 import os
 import argparse

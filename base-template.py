@@ -2,6 +2,7 @@
 # Advent of Code $year - Day $day_padded - $title_clean
 # Problem: See ./$desc_path for full details
 # Author: Ciovino
+# Template Version: v1.0
 # ---------------------------------------------------------------------
 import os
 import argparse

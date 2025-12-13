@@ -2,6 +2,7 @@
 # Advent of Code 2025 - Day 08 - Playground
 # Problem: See .\2025/08-playground-description.md for full details
 # Author: Ciovino
+# Template Version: v1.0
 # ---------------------------------------------------------------------
 import os
 import argparse

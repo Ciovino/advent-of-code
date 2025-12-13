@@ -2,6 +2,7 @@
 # Advent of Code 2025 - Day 10 - Factory
 # Problem: See .\2025/10-factory-description.md for full details
 # Author: Ciovino
+# Template Version: v1.0
 # ---------------------------------------------------------------------
 import os
 import argparse
