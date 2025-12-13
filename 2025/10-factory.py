@@ -4,22 +4,44 @@
 # Author: Ciovino
 # ---------------------------------------------------------------------
 import os
-from collections import deque
+import argparse
+import time
+
+# Useful imports
+import re
+from collections import defaultdict, Counter, deque
+from itertools import combinations, permutations, product
+from math import gcd, lcm, ceil, floor
 from scipy.optimize import milp, LinearConstraint, Bounds
 import numpy as np
 
-# Parse the input
-machines: list[tuple[str, dict[int, tuple], list[int]]] = []
-with open(os.path.join('data', '2025-10.in'), 'r') as f:
-    for line in f:
-        line_splitted = line.strip().split()
-        target, buttons, joltage = line_splitted[0], line_splitted[1:-1], line_splitted[-1]
-        parsed_target = target[1:-1]
-        
-        parsed_joltage = list(map(int, joltage[1:-1].split(',')))
-        parsed_buttons: dict[int, tuple] = {i: tuple(map(int, b[1:-1].split(','))) for i, b in enumerate(buttons)}
-        
-        machines.append((parsed_target, parsed_buttons, parsed_joltage))
+INPUT_FILE = os.path.join('data', '2025-10.in')
+TEST_FILE = os.path.join('data', 'test.in')
+VERBOSE = False
+
+def log(*args, **kwargs):
+    if VERBOSE: # Print only if VERBOSE is enabled
+        print(*args, **kwargs)
+
+def get_args() -> dict:
+    parser = argparse.ArgumentParser(description="Solution script for 10/2025 Advent of Code.")
+    parser.add_argument('-t', '--test', action='store_true',  help=f"Run the script using the test file ({TEST_FILE})")
+    parser.add_argument('-v', '--verbose', action='store_true', help="Enable verbose output.")
+    return parser.parse_args()
+
+def parse_input(file_name) -> list[tuple[str, dict[int, tuple[int]], list[int]]]:
+    data: list[tuple[str, dict[int, tuple[int]], list[int]]] = []
+    with open(file_name, 'r') as f:
+        for line in f:
+            line = line.strip().split()
+            target, buttons, joltage = line[0], line[1:-1], line[-1]
+            
+            parsed_target = target[1:-1]
+            parsed_buttons: dict[int, tuple[int]] = {i: tuple(map(int, b[1:-1].split(','))) for i, b in enumerate(buttons)}
+            parsed_joltage: list[int] = list(map(int, joltage[1:-1].split(',')))
+            
+            data.append((parsed_target, parsed_buttons, parsed_joltage))
+    return data
 
 # --- SOLVE ---
 def press_button(machine_state: str, button: tuple) -> str:
@@ -85,12 +107,40 @@ def solve_joltage(machine: tuple[str, dict[int, tuple], list[int]]) -> int:
     else:
         raise ValueError(f"No valid solution for machine: {machine}")
 
-machine_solutions: list[tuple[int, list[int]]] = []
-joltage_solutions: list[int] = []
-for machine in machines:
-    machine_solutions.append(solve_lights(machine))
-    joltage_solutions.append(solve_joltage(machine))
+def solve_part1(machines: list[tuple[str, dict[int, tuple[int]], list[int]]]) -> int:
+    """Solution for Part 1."""
+    return sum(solve_lights(machine)[0] for machine in machines)
 
-# --- PRINT ---
-print(f"AOC_SOL_1={sum([ms[0] for ms in machine_solutions])}")
-print(f"AOC_SOL_2={sum(joltage_solutions)}")
+def solve_part2(machines: list[tuple[str, dict[int, tuple[int]], list[int]]]) -> int:
+    """Solution for Part 2."""
+    return sum(solve_joltage(machine) for machine in machines)
+
+if __name__ == '__main__':
+    args = get_args()
+    if args.test:
+        if not os.path.exists(TEST_FILE):
+            print(f"ERROR: Test file '{TEST_FILE}' not found.")
+            exit(1)
+        use_file = TEST_FILE
+    else:
+        use_file = INPUT_FILE
+    VERBOSE = args.verbose
+    
+    # Parsing
+    start_time = time.time()
+    data = parse_input(use_file)
+    log(f"Input parsed in {time.time()-start_time:.4f}s")
+    
+    # Part 1
+    start_time = time.time()
+    sol1 = solve_part1(data)
+    log(f"Part 1: {sol1}, took {time.time()-start_time:.4f}s")
+    
+    # Part 2
+    start_time = time.time()
+    sol2 = solve_part2(data)
+    log(f"Part 2: {sol2}, took {time.time()-start_time:.4f}s")
+
+    # --- PRINT SOLUTIONS ---
+    print(f"AOC_SOL_1={sol1}")
+    print(f"AOC_SOL_2={sol2}")

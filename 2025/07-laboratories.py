@@ -4,13 +4,35 @@
 # Author: Ciovino
 # ---------------------------------------------------------------------
 import os
+import argparse
+import time
 
-# Parse the input
-with open(os.path.join('data', '2025-07.in'), 'r') as f:
-    tachyon_manifold: list[list[str]] = list(map(lambda s: s.strip(), f.readlines()))
+# Useful imports
+import re
+from collections import defaultdict, Counter, deque
+from itertools import combinations, permutations, product
+from math import gcd, lcm, ceil, floor
+
+INPUT_FILE = os.path.join('data', '2025-07.in')
+TEST_FILE = os.path.join('data', 'test.in')
+VERBOSE = False
+
+def log(*args, **kwargs):
+    if VERBOSE: # Print only if VERBOSE is enabled
+        print(*args, **kwargs)
+
+def get_args() -> dict:
+    parser = argparse.ArgumentParser(description="Solution script for 07/2025 Advent of Code.")
+    parser.add_argument('-t', '--test', action='store_true',  help=f"Run the script using the test file ({TEST_FILE})")
+    parser.add_argument('-v', '--verbose', action='store_true', help="Enable verbose output.")
+    return parser.parse_args()
+
+def parse_input(file_name) -> list[list[str]]:
+    with open(file_name, 'r') as f:
+        data: list[list[str]] = list(map(lambda s: s.strip(), f.readlines()))
+    return data
 
 # --- SOLVE ---
-# Locate beam source
 def count_beam_split(beam_source: int, tachyon: list[list[str]]) -> tuple[int, dict[int, set[int]]]:
     total_splits = 0
     beam_positions: dict[int, set[int]] = { 0: {beam_source} }
@@ -30,6 +52,11 @@ def count_beam_split(beam_source: int, tachyon: list[list[str]]) -> tuple[int, d
         # Add beam for next iterations
         beam_positions[i] = new_beam_positions
     return total_splits, beam_positions
+
+def solve_part1(tachyon_manifold: list[list[str]]) -> int:
+    """Solution for Part 1."""
+    split, _ = count_beam_split(tachyon_manifold[0].find('S'), tachyon_manifold)
+    return split
 
 def count_timeline_dp(all_beam_positions: dict[int, set[int]], tachyon: list[list[str]]) -> int:
     N: int = len(tachyon) # Number of rows
@@ -54,9 +81,38 @@ def count_timeline_dp(all_beam_positions: dict[int, set[int]], tachyon: list[lis
     starting_col = next(iter(all_beam_positions[starting_row]))
     return dynamic_programming[(starting_row, starting_col)]
 
-split, beam_positions = count_beam_split(tachyon_manifold[0].find('S'), tachyon_manifold)
-timelines_dp = count_timeline_dp(beam_positions, tachyon_manifold)
+def solve_part2(tachyon_manifold: list[list[str]]) -> int:
+    """Solution for Part 2."""
+    _, beam_positions = count_beam_split(tachyon_manifold[0].find('S'), tachyon_manifold)
+    timelines_dp = count_timeline_dp(beam_positions, tachyon_manifold)
+    return timelines_dp
 
-# --- PRINT ---
-print(f"AOC_SOL_1={split}")
-print(f"AOC_SOL_2={timelines_dp}")
+if __name__ == '__main__':
+    args = get_args()
+    if args.test:
+        if not os.path.exists(TEST_FILE):
+            print(f"ERROR: Test file '{TEST_FILE}' not found.")
+            exit(1)
+        use_file = TEST_FILE
+    else:
+        use_file = INPUT_FILE
+    VERBOSE = args.verbose
+    
+    # Parsing
+    start_time = time.time()
+    data = parse_input(use_file)
+    log(f"Input parsed in {time.time()-start_time:.4f}s")
+    
+    # Part 1
+    start_time = time.time()
+    sol1 = solve_part1(data)
+    log(f"Part 1: {sol1}, took {time.time()-start_time:.4f}s")
+    
+    # Part 2
+    start_time = time.time()
+    sol2 = solve_part2(data)
+    log(f"Part 2: {sol2}, took {time.time()-start_time:.4f}s")
+
+    # --- PRINT SOLUTIONS ---
+    print(f"AOC_SOL_1={sol1}")
+    print(f"AOC_SOL_2={sol2}")

@@ -5,35 +5,32 @@
 # ---------------------------------------------------------------------
 import os
 import argparse
+import time
+
+# Useful imports
 import re
+from collections import defaultdict, Counter, deque
+from itertools import combinations, permutations, product
+from math import gcd, lcm, ceil, floor
 
 INPUT_FILE = os.path.join('data', '2025-12.in')
 TEST_FILE = os.path.join('data', 'test.in')
+VERBOSE = False
 
-def get_args():
-    parser = argparse.ArgumentParser(description="Process data files.")
-    
-    # Optional positional argument (for 'test')
-    # nargs='?' means the argument is optional
-    parser.add_argument(
-        'mode', 
-        nargs='?', 
-        help="Optional mode (type 'test' to use test data)"
-    )
-    
-    # Flag for verbose (store_true sets it to True if present, False otherwise)
-    parser.add_argument(
-        '-v', '--verbose', 
-        action='store_true', 
-        help="Enable verbose output"
-    )
-    
+def log(*args, **kwargs):
+    if VERBOSE: # Print only if VERBOSE is enabled
+        print(*args, **kwargs)
+
+def get_args() -> dict:
+    parser = argparse.ArgumentParser(description="Solution script for $day_padded/$year Advent of Code.")
+    parser.add_argument('-t', '--test', action='store_true',  help=f"Run the script using the test file ({TEST_FILE})")
+    parser.add_argument('-v', '--verbose', action='store_true', help="Enable verbose output.")
     return parser.parse_args()
 
 # Parse the input
-def parse_input(file_name):
-    blocks = {}
-    grids = []
+def parse_input(file_name) -> tuple[dict[int, list[str]], list[tuple[tuple[int, int], list[int]]]]:
+    blocks: dict[int, list[str]] = {}
+    grids: list[tuple[tuple[int, int], list[int]]] = []
     block_id = None
     block_lines = []
 
@@ -272,27 +269,55 @@ class Solver:
             print("".join(row_str))
         print()
 
-if __name__ == '__main__':
-    args = get_args()
-    if args.mode and args.mode.lower() == 'test' and os.path.exists(TEST_FILE):
-        use_file = TEST_FILE
-    else:
-        use_file = INPUT_FILE
-    VERBOSE = args.verbose
+def solve_part1(data: tuple[dict[int, list[str]], list[tuple[tuple[int, int], list[int]]]]) -> int:
+    """Solution for Part 1."""
+    blocks, grids = data # Unpack
     
-    blocks, grids = parse_input(use_file)
     blocks = {b_id: Block(b_id, b_lines) for b_id, b_lines in blocks.items()}
     if VERBOSE:
         for block in blocks.values():
             block.visualize()
-
+    
     solvable = 0
     for g in grids:
         solver = Solver(g[0][0], g[0][1], g[1], blocks)
         solvable += solver.solve()
         if VERBOSE:
-            print(f"Grid ({solver.height}x{solver.width}: {g[1]}): ", end='')
+            log(f"Grid ({solver.height}x{solver.width}: {g[1]}): ", end='')
             solver.print_state()
+    
+    return solvable
 
-    # --- PRINT ---
-    print(f"AOC_SOL_1={solvable}")
+def solve_part2(data: tuple[dict[int, list[str]], list[tuple[tuple[int, int], list[int]]]]) -> int:
+    """Solution for Part 2."""
+    return None
+
+if __name__ == '__main__':
+    args = get_args()
+    if args.test:
+        if not os.path.exists(TEST_FILE):
+            print(f"ERROR: Test file '{TEST_FILE}' not found.")
+            exit(1)
+        use_file = TEST_FILE
+    else:
+        use_file = INPUT_FILE
+    VERBOSE = args.verbose
+    
+    # Parsing
+    start_time = time.time()
+    data = parse_input(use_file)
+    log(f"Input parsed in {time.time()-start_time:.4f}s")
+    
+    # Part 1
+    start_time = time.time()
+    sol1 = solve_part1(data)
+    log(f"Part 1: {sol1}, took {time.time()-start_time:.4f}s")
+    
+    # Part 2
+    start_time = time.time()
+    sol2 = solve_part2(data)
+    log(f"Part 2: {sol2}, took {time.time()-start_time:.4f}s")
+
+    # --- PRINT SOLUTIONS ---
+    print(f"AOC_SOL_1={sol1}")
+    print(f"AOC_SOL_2={sol2}")

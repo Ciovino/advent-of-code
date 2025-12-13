@@ -4,65 +4,101 @@
 # Author: Ciovino
 # ---------------------------------------------------------------------
 import os
+import argparse
+import time
 
-# Parse the input
-with open(os.path.join('data', '2025-02.in'), 'r') as f:
-    line = f.readline().strip()
-    
-    id_ranges: list[str] = line.split(',')
+# Useful imports
+import re
+from collections import defaultdict, Counter, deque
+from itertools import combinations, permutations, product
+from math import gcd, lcm, ceil, floor
 
-def double_sequence(id: int) -> bool:
-    # Part One
-    # Check if an id is made up by a sequence repeated twice
-    
-    id_str = str(id)
-    
-    # If a sequence is repeated twice, the id must have an even length
-    if len(id_str) % 2 != 0:
-        return False
-    
-    # Divide the string in two parts and compare
-    midpoint = len(id_str) // 2
-    first_half, second_half = id_str[:midpoint], id_str[midpoint:]
-    
-    return first_half == second_half
+INPUT_FILE = os.path.join('data', '2025-02.in')
+TEST_FILE = os.path.join('data', 'test.in')
+VERBOSE = False
 
-def repeated_sequence(id: int) -> bool:
-    # Part Two
-    # Check if an id is made up of a sequence repeated N times
-    
-    id_str = str(id)
-    
-    for sequence_length in range(1, len(id_str) // 2 + 1):
-        # Repeat for each possible sequence
-        # The length of the string must be a multiple of the length of the sequence
-        if len(id_str) % sequence_length != 0: continue # Skip this one
+def log(*args, **kwargs):
+    if VERBOSE: # Print only if VERBOSE is enabled
+        print(*args, **kwargs)
+
+def get_args() -> dict:
+    parser = argparse.ArgumentParser(description="Solution script for 02/2025 Advent of Code.")
+    parser.add_argument('-t', '--test', action='store_true',  help=f"Run the script using the test file ({TEST_FILE})")
+    parser.add_argument('-v', '--verbose', action='store_true', help="Enable verbose output.")
+    return parser.parse_args()
+
+def parse_input(file_name) -> list[str]:
+    with open(file_name, 'r') as f:
+        data = f.readline().strip()
+    return data.split(',')
+
+# --- SOLVE ---
+def solve_part1(id_ranges: list[str]):
+    """Solution for Part 1."""
+    def double_sequence(id: int) -> int:
+        id_str = str(id)
+        if len(id_str) % 2 != 0:
+            return False
         
-        sequence = id_str[:sequence_length]
-        if id_str.count(sequence) * sequence_length == len(id_str):
-            return True
+        mid_point = len(id_str) // 2
+        first_half, second_half = id_str[:mid_point], id_str[mid_point:]
+        return id if first_half == second_half else 0
     
-    return False # All possible checks failed
+    invalid_ids: int = 0
+    for id_range in id_ranges:
+        first_id, last_id = tuple(map(int, id_range.split('-')))
+        for id in range(first_id, last_id + 1):
+            invalid_ids += double_sequence(id)
 
-# Collect all the invalid ids, separating for each part
-invalid_ids: dict[str, list[int]] = {
-    "part-one": [],
-    "part-two": []
-} 
-for id_range in id_ranges:
-    # Extract first and last id
-    first_id, last_id = tuple(map(int, id_range.split('-')))
+    return invalid_ids
+
+def solve_part2(id_ranges: list[str]):
+    """Solution for Part 2."""
+    def repeated_sequence(id: int) -> int:
+        id_str = str(id)
+        len_id = len(id_str)
+        
+        for sequence_length in range(1, len_id//2 + 1):
+            if len_id % sequence_length != 0: continue
+            sequence = id_str[:sequence_length]
+            if id_str.count(sequence) * sequence_length == len_id:
+                return id
+        return 0
     
-    # Loop for each id in the range, including the extremes
-    for id in range(first_id, last_id + 1):
-        if double_sequence(id):
-            invalid_ids['part-one'].append(id)
-            # A invalid id for part one is also invalid for part tow
-            invalid_ids['part-two'].append(id)
-        elif repeated_sequence(id):
-            # Check with the more general function
-            invalid_ids['part-two'].append(id)
+    invalid_ids: int = 0
+    for id_range in id_ranges:
+        first_id, last_id = tuple(map(int, id_range.split('-')))
+        for id in range(first_id, last_id + 1):
+            invalid_ids += repeated_sequence(id)
 
-# --- PRINT ---
-print(f"AOC_SOL_1={sum(invalid_ids['part-one'])}")
-print(f"AOC_SOL_2={sum(invalid_ids['part-two'])}")
+    return invalid_ids
+
+if __name__ == '__main__':
+    args = get_args()
+    if args.test:
+        if not os.path.exists(TEST_FILE):
+            print(f"ERROR: Test file '{TEST_FILE}' not found.")
+            exit(1)
+        use_file = TEST_FILE
+    else:
+        use_file = INPUT_FILE
+    VERBOSE = args.verbose
+    
+    # Parsing
+    start_time = time.time()
+    data = parse_input(use_file)
+    log(f"Input parsed in {time.time()-start_time:.4f}s")
+    
+    # Part 1
+    start_time = time.time()
+    sol1 = solve_part1(data)
+    log(f"Part 1: {sol1}, took {time.time()-start_time:.4f}s")
+    
+    # Part 2
+    start_time = time.time()
+    sol2 = solve_part2(data)
+    log(f"Part 2: {sol2}, took {time.time()-start_time:.4f}s")
+
+    # --- PRINT SOLUTIONS ---
+    print(f"AOC_SOL_1={sol1}")
+    print(f"AOC_SOL_2={sol2}")
