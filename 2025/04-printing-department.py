@@ -2,6 +2,7 @@
 # Advent of Code 2025 - Day 04 - Printing Department
 # Problem: See .\2025\04-printing-department-description.md for full details
 # Author: Ciovino
+# Template Version: v1.0
 # ---------------------------------------------------------------------
 import os
 import argparse

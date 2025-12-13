@@ -2,6 +2,7 @@
 # Advent of Code 2025 - Day 02 - Gift shop
 # Problem: See ./02-gift-shop-description.md for full details
 # Author: Ciovino
+# Template Version: v1.0
 # ---------------------------------------------------------------------
 import os
 import argparse

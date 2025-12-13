@@ -2,6 +2,7 @@
 # Advent of Code 2025 - Day 12 - Christmas Tree Farm
 # Problem: See .\2025/12-christmas-tree-farm-description.md for full details
 # Author: Ciovino
+# Template Version: v1.0
 # ---------------------------------------------------------------------
 import os
 import argparse
