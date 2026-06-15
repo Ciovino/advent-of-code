@@ -267,7 +267,7 @@ def submit_answer(year, day, level, answer):
         elif "too low" in text:
             logging.warning("Wrong: Answer is too low.")
         else:
-            logging.warning("Wrrong: Answer.")
+            logging.warning("Wrong: Answer.")
     elif "You gave an answer too recently" in text:
         wait_match = re.search(r"You have (?:(\d+)m )?(\d+)s left to wait", text)
         if wait_match:
