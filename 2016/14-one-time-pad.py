@@ -1,0 +1,116 @@
+# ---------------------------------------------------------------------
+# Advent of Code 2016 - Day 14 - One-Time Pad
+# Problem: See ./2016/14-one-time-pad-description.md for full details
+# Author: Ciovino
+# Template Version: v2.0
+# ---------------------------------------------------------------------
+import os
+import argparse
+import time
+
+# Useful imports
+import re
+from collections import defaultdict, Counter, deque
+from itertools import combinations, permutations, product
+from math import gcd, lcm, ceil, floor
+from hashlib import md5
+
+INPUT_FILE = os.path.join('data', '2016-14.in')
+TEST_FILE = os.path.join('data', 'test.in')
+VERBOSE = False
+
+def log(*args, **kwargs):
+    if VERBOSE: # Print only if VERBOSE is enabled
+        print(*args, **kwargs)
+
+def get_args() -> dict:
+    parser = argparse.ArgumentParser(description="Solution script for 14/2016 Advent of Code.")
+    parser.add_argument('-t', '--test', action='store_true',  help=f"Run the script using the test file ({TEST_FILE})")
+    parser.add_argument('-v', '--verbose', action='store_true', help="Enable verbose output.")
+    return parser.parse_args()
+
+def find_numbers(text):
+    return [int(n) for n in re.findall(r'-?\d+', text)]
+
+def parse_input(file_name):
+    with open(file_name, 'r') as f:
+        data = f.read().strip()
+    return data
+
+# --- SOLVE ---
+def compute_hash(data: str, stretching = 0) -> str:
+    md5_hash = md5(data.encode()).hexdigest().lower()
+    for _ in range(stretching):
+        md5_hash = md5(md5_hash.encode()).hexdigest().lower()
+    return md5_hash
+
+def compute_key(salt, stretching, key=64):
+    key_found, idx = 0, 1000
+
+    # Prime with 1000 hashes
+    all_hash = deque()
+    for i in range(1000):
+        all_hash.append((i, compute_hash(f"{salt}{i}", stretching=stretching)))
+    
+    while key_found < key:
+        # Check if the first has a triple
+        current_idx, md5_hash = all_hash.popleft()
+        selected_char = None
+        for i in range(len(md5_hash) - 2):
+            if len(set(md5_hash[i:i+3])) == 1:
+                selected_char = md5_hash[i]
+                break
+        
+        # add next hash
+        all_hash.append((idx, compute_hash(f"{salt}{idx}", stretching=stretching)))
+        idx += 1
+
+        if not selected_char: continue
+
+        # Check if the quintuple exist
+        to_check = selected_char * 5
+        for _, md5_hash in all_hash:
+            if to_check in md5_hash:
+                key_found += 1
+                log(key_found)
+                break
+
+    return current_idx
+
+def solve_part1(salt: str):
+    """Solution for Part 1."""
+    return compute_key(salt, stretching=0)
+
+def solve_part2(salt: str):
+    """Solution for Part 2."""
+    return compute_key(salt, stretching=2016)
+
+if __name__ == '__main__':
+    args = get_args()
+    if args.test:
+        if not os.path.exists(TEST_FILE):
+            print(f"ERROR: Test file '{TEST_FILE}' not found.")
+            exit(1)
+        use_file = TEST_FILE
+    else:
+        use_file = INPUT_FILE
+    VERBOSE = args.verbose
+    
+    # Parsing
+    start_time = time.time()
+    data = parse_input(use_file)
+    log(f"Input parsed in {time.time()-start_time:.4f}s")
+    
+    # Part 1
+    start_time = time.time()
+    sol1 = solve_part1(data)
+    log(f"Part 1: {sol1}, took {time.time()-start_time:.4f}s")
+    
+    # Part 2
+    start_time = time.time()
+    sol2 = solve_part2(data)
+    log(f"Part 2: {sol2}, took {time.time()-start_time:.4f}s")
+
+    # --- PRINT SOLUTIONS ---
+    print(f"AOC_SOL_1={sol1}")
+    print(f"AOC_SOL_2={sol2}")
